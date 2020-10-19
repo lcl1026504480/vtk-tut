@@ -1,27 +1,19 @@
-import vtk
+from tvtk.api import tvtk
 
-# 箭头源
-arrow_source = vtk.vtkArrowSource()
-# 映射器
-mapper = vtk.vtkPolyDataMapper()
-# 映射器添加数据源
-mapper.SetInputConnection(arrow_source.GetOutputPort())
-# 演员
-actor = vtk.vtkActor()
-# 演员添加映射器
-actor.SetMapper(mapper)
-# 绘制器
-ren = vtk.vtkRenderer()
-# 绘制器添加演员
-ren.AddActor(actor)
-# 绘制窗口
-renWin = vtk.vtkRenderWindow()
-# 绘制窗口添加绘制器
-renWin.AddRenderer(ren)
-# 创建窗口交互器
-iren = vtk.vtkRenderWindowInteractor()
-iren.SetRenderWindow(renWin)
-iren.Initialize()
-# 窗口读取绘制器生成的图形
-renWin.Render()
-iren.Start()
+# 创建一个长方体数据源，并且同时设置其长宽高
+s = tvtk.CubeSource(x_length=1.0, y_length=2.0, z_length=3.0)
+# 使用PolyDataMapper将数据转换为图形数据
+m = tvtk.PolyDataMapper(input_connection=s.output_port)
+# 创建一个Actor
+a = tvtk.Actor(mapper=m)
+# 创建一个Renderer，将Actor添加进去
+r = tvtk.Renderer(background=(255/255, 0, 0))
+r.add_actor(a)
+# 创建一个RenderWindow(窗口)，将Renderer添加进去
+w = tvtk.RenderWindow(size=(300,300))
+w.add_renderer(r)
+# 创建一个RenderWindowInteractor（窗口的交互工具)
+i = tvtk.RenderWindowInteractor(render_window=w)
+# 开启交互
+i.initialize()
+i.start()
