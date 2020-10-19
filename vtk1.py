@@ -1,14 +1,9 @@
 from tvtk.api import tvtk
-import numpy as np
+from tvtkfunc import ivtk_scene, event_loop
+s = tvtk.STLReader(file_name="python.stl")  #调用stl文件
+m = tvtk.PolyDataMapper(input_connection=s.output_port)
+a = tvtk.Actor(mapper=m)
 
-x = np.array([0, 3, 9, 15])
-y = np.array([0, 1, 5])
-z = np.array([0, 2, 3])
-r = tvtk.RectilinearGrid()
-r.x_coordinates = x
-r.y_coordinates = y
-r.z_coordinates = z
-r.dimensions = len(x), len(y), len(z)
-for n in range(10):
-    print(r.get_point(n))
-
+win = ivtk_scene(a)
+win.scene.isometric_view()
+event_loop()
