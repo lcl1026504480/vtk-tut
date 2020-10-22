@@ -5,14 +5,24 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from skimage import measure
 from skimage.draw import ellipsoid
 
+import cv2 as cv
+
+
+images = []
+d = 3
+path = ["res/%d.png" % i for i in range(1, d)]
+for fn in path:
+    print(fn)
+    images.append(cv.imread(fn, 0) / 255)
+
+images = np.array(images)
 
 # Generate a level set about zero of two identical ellipsoids in 3D
-ellip_base = ellipsoid(6, 10, 16, levelset=True)
-ellip_double = np.concatenate((ellip_base[:-1, ...],
-                               ellip_base[2:, ...]), axis=0)
-
+# ellip_base = ellipsoid(6, 10, 16, levelset=True)
+# ellip_double = np.concatenate((ellip_base[:-1, ...],
+#                                ellip_base[2:, ...]), axis=0)
 # Use marching cubes to obtain the surface mesh of these ellipsoids
-verts, faces, normals, values = measure.marching_cubes_lewiner(ellip_double, 0)
+verts, faces, _, _ = measure.marching_cubes_lewiner(images, 0)
 
 # Display resulting triangular mesh using Matplotlib. This can also be done
 # with mayavi (see skimage.measure.marching_cubes_lewiner docstring).

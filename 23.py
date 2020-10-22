@@ -1,5 +1,5 @@
-import numpy as np
-from mayavi import mlab
+# import numpy as np
+# from mayavi import mlab
 #建立数据
 #x,y = np.mgrid[-10:10:200j,-10:10:200j]
 #z = 100 * np.sin(x * y) / (x * y)
