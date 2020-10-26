@@ -30,12 +30,12 @@ for fn in glob.glob("res/*"):
 
     img = cv.bilateralFilter(img, 21, 11, 11)
 
-    k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (9, 9))
-    img = cv.morphologyEx(img, cv.MORPH_CLOSE, k)
-    k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (3, 3))
+    # k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (9, 9))
+    # img = cv.morphologyEx(img, cv.MORPH_CLOSE, k)
+    k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (17, 17))
     img = cv.morphologyEx(img, cv.MORPH_OPEN, k)
 
-    img = gamma(img, 5)
+    # img = gamma(img, 6)
     # img = cv.equalizeHist(img)
     # s = cv.equalizeHist(s)
 
@@ -46,19 +46,20 @@ for fn in glob.glob("res/*"):
 
     img = cv.equalizeHist(img)
 
-    # img = gamma(img, 5)
+    img = gamma(img, 3)
 
-    # k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
-    # img = cv.morphologyEx(img, cv.MORPH_OPEN, k)
-    # img = gamma(img, 2)
+    k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
+    img = cv.morphologyEx(img, cv.MORPH_OPEN, k)
+    img = gamma(img, 2.8)
+
     # img = cv.equalizeHist(img)
     # plt.hist(img.ravel(), 256, [0, 256])
     # plt.show()
+
     img = cv.GaussianBlur(img, (5, 5), 1)
 
-    plt.imshow(img, cmap="gray")
-
-    plt.show()
+    # plt.imshow(img, cmap="gray")
+    # plt.show()
 
     # #
 
@@ -90,16 +91,16 @@ for fn in glob.glob("res/*"):
     # edges = cv.medianBlur(edges, 5)
     # edges = cv.medianBlur(edges, 3)
 
-    k = cv.getStructuringElement(cv.MORPH_CROSS, (3, 3))
-
+    k = cv.getStructuringElement(cv.MORPH_CROSS, (9, 9))
     edges = cv.morphologyEx(edges, cv.MORPH_CLOSE, k, iterations=1)
     # edges = cv.medianBlur(edges, 7)
 
     k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
-    edges = cv.erode(edges, k)
 
-    edges = cv.medianBlur(edges, 7)
-    edges = cv.medianBlur(edges, 5)
+    # edges = cv.dilate(edges, k)
+    # edges = cv.medianBlur(edges, 7)
+    # edges = cv.medianBlur(edges, 5)
+
     # edges = cv.dilate(edges, k, iterations=2)
     # edges = cv.morphologyEx(edges, cv.MORPH_OPEN, k, iterations=1)
     # cv.imwrite("25.png", edges)
@@ -114,14 +115,16 @@ for fn in glob.glob("res/*"):
     contours, hierarchy = cv.findContours(edges, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
     for i in contours:
         # print(i)
-        if cv.contourArea(i) < 500:
-            for pts in i[0]:
-                edges[pts[1], pts[0]] = 0
-    #         # cv.drawContours(res, i, -1, (255, 255, 255), 5)
+        if cv.contourArea(i) < 200:
+            cv.fillConvexPoly(edges, i, 0)
+    #         for pts in i[0]:
+    #             edges[pts[1], pts[0]] = 0
+    # #         # cv.drawContours(res, i, -1, (255, 255, 255), 5)
     # cv.imshow("1", res)
     # cv.waitKey()
-    plt.imshow(edges, cmap="gray")
+    # plt.imshow(edges, cmap="gray")
 
-    plt.show()
+    # plt.show()
+    # edges = cv.bitwise_not(edges)
 
-    cv.imwrite("process/" + fn.split("\\")[-1], edges)
+    cv.imwrite("bg/" + fn.split("\\")[-1], edges)

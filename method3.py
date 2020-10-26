@@ -1,4 +1,6 @@
 import numpy as np
+from mayavi import mlab
+from tvtk.api import tvtk
 
 # 宽150.8619：875
 # 高33.1265：656
@@ -25,8 +27,6 @@ def isosurfacing(data):
     # del hist, bins, brain_thr_idx
 
     # Display the data #############################################################
-    from mayavi import mlab
-    from tvtk.api import tvtk
 
     fig = mlab.figure(bgcolor=(0, 0, 0), size=(400, 500))
     # to speed things up
@@ -34,7 +34,7 @@ def isosurfacing(data):
 
     src = mlab.pipeline.scalar_field(data)
     # Our data is not equally spaced in all directions:
-    src.spacing = [1, 1, 4]
+    src.spacing = [1, 1, 20]
     src.update_image_data = True
 
     #----------------------------------------------------------------------
@@ -46,14 +46,14 @@ def isosurfacing(data):
     # the Mayavi pipeline.
 
     # Apply image-based filters to clean up noise
-    thresh_filter = tvtk.ImageThreshold()
-    thresh_filter.threshold_between(lower_thr, upper_thr)
-    thresh = mlab.pipeline.user_defined(src, filter=thresh_filter)
+    # thresh_filter = tvtk.ImageThreshold()
+    # thresh_filter.threshold_between(lower_thr, upper_thr)
+    # thresh = mlab.pipeline.user_defined(src, filter=thresh_filter)
 
     median_filter = tvtk.ImageMedian3D()
 
     median_filter.kernel_size = [3, 3, 3]
-    median = mlab.pipeline.user_defined(thresh, filter=median_filter)
+    median = mlab.pipeline.user_defined(src, filter=median_filter)
 
     diffuse_filter = tvtk.ImageAnisotropicDiffusion3D(
         diffusion_factor=1.0,
@@ -64,12 +64,12 @@ def isosurfacing(data):
 
     # Extract brain surface
     contour = mlab.pipeline.contour(diffuse, )
-    contour.filter.contours = [brain_thr, ]
+    contour.filter.contours = [0.5, ]
 
     # Apply mesh filter to clean up the mesh (decimation and smoothing)
-    dec = mlab.pipeline.decimate_pro(contour)
+    dec = mlab.pipeline.decimate_pro(mlab.pipeline.triangle_filter(contour))
     dec.filter.feature_angle = 60.
-    dec.filter.target_reduction = 0.7
+    dec.filter.target_reduction = 0.5
 
     smooth_ = tvtk.SmoothPolyDataFilter(
         number_of_iterations=10,
@@ -79,6 +79,7 @@ def isosurfacing(data):
         boundary_smoothing=False,
         convergence=0.,
     )
+
     smooth = mlab.pipeline.user_defined(dec, filter=smooth_)
 
     # Get the largest connected region
@@ -89,8 +90,8 @@ def isosurfacing(data):
     compute_normals = mlab.pipeline.poly_data_normals(connect)
     compute_normals.filter.feature_angle = 80
 
-    surf = mlab.pipeline.sceurfa(compute_normals,
-                                 color=(0.9, 0.72, 0.62))
+    surf = mlab.pipeline.surface(compute_normals,
+                                 color=(1, 1, 1))
 
     #----------------------------------------------------------------------
     # Display a cut plane of the raw data
@@ -98,8 +99,8 @@ def isosurfacing(data):
                                            plane_orientation='z_axes',
                                            slice_index=55)
 
-    mlab.view(-165, 32, 350, [143, 133, 73])
-    mlab.roll(180)
+    # mlab.view(-165, 32, 350, [143, 133, 73])
+    # mlab.roll(180)
 
     fig.scene.disable_render = False
 
@@ -117,11 +118,11 @@ def isosurfacing(data):
 import cv2 as cv
 import glob
 images = []
-d = len(glob.glob("res/*"))
-path = ["res/%d.png" % i for i in range(1, d, 10)]
+d = len(glob.glob("process/*"))
+path = ["process/%d.png" % i for i in range(1, d, 5)]
 for fn in path:
     print(fn)
-    images.append(cv.resize(cv.imread(fn, 0), (150, 33)) / 255)
+    images.append(cv.resize(cv.imread(fn, 0), (1500, 330)) / 255)
 
 images = np.array(images)
 images = np.swapaxes(images, 0, -1)
