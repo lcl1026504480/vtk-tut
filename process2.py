@@ -28,6 +28,8 @@ for fn in [112]:
     raw = cv2.imread("res/%d.png" % fn, 0)
 
     raw = gamma(raw, 2)
+    raw = cv.normalize(raw, None, 0, 255, cv.NORM_MINMAX)
+
     # raw = cv2.equalizeHist(raw)
     raw = cv2.merge([raw] * 3)
     h, w = fg.shape

@@ -20,7 +20,7 @@ def gamma(img, g=1.0):
 
 import glob
 
-for fn in glob.glob("res/447.png"):
+for fn in glob.glob("res/*"):
     print(fn)
     # image = cv.imread(fn, 1)
     img = cv.imread(fn, 0)
@@ -31,12 +31,12 @@ for fn in glob.glob("res/447.png"):
     img = cv.bilateralFilter(img, 21, 11, 11)
 
     # img = cv.equalizeHist(img)
-    img = gamma(img, 3)
+    img = gamma(img, 1.2)
     img = cv.normalize(img, None, 0, 255, cv.NORM_MINMAX)
     # img = gamma(img, 2)
     # k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (9, 9))
     # img = cv.morphologyEx(img, cv.MORPH_CLOSE, k)
-    k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (7, 7))
+    k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (3, 3))
     img = cv.morphologyEx(img, cv.MORPH_CLOSE, k)
 
     # img = gamma(img, 6)
@@ -74,7 +74,7 @@ for fn in glob.glob("res/447.png"):
 
     # print(ret)
 
-    dc, dr = 5, 5
+    dc, dr = 250, 250
     std = dc * dr / 100
     mean = ret
     edges = img.copy()
@@ -87,28 +87,28 @@ for fn in glob.glob("res/447.png"):
                 if roi.min() > mean:
                     edges[row: row + dr, col: col + dc] = 255
                 else:
-
                     _, edges[row: row + dr,
                              col: col + dc] = cv.threshold(roi, ret, 255,
                                                            cv.THRESH_BINARY | cv.THRESH_OTSU)
 
     # edges = cv.Canny(img, 50, 310)
 
-    # edges = cv.medianBlur(edges, 7)
-    edges = cv.medianBlur(edges, 5)
+    edges = cv.medianBlur(edges, 7)
+    # edges = cv.medianBlur(edges, 5)
     # edges = cv.medianBlur(edges, 3)
 
     k = cv.getStructuringElement(cv.MORPH_CROSS, (11, 11))
     edges = cv.morphologyEx(edges, cv.MORPH_CLOSE, k, iterations=1)
     # edges = cv.medianBlur(edges, 7)
 
-    k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (1, 5))
+    k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (7, 7))
 
-    # edges = cv.dilate(edges, k)
+    edges = cv.dilate(edges, k)
     # edges = cv.medianBlur(edges, 7)
     # edges = cv.medianBlur(edges, 5)
 
-    edges = cv.erode(edges, k, iterations=1)
+    # edges = cv.erode(edges, k, iterations=1)
+
     # edges = cv.morphologyEx(edges, cv.MORPH_OPEN, k, iterations=1)
     # cv.imwrite("25.png", edges)
     # h, w = edges.shape
@@ -131,7 +131,7 @@ for fn in glob.glob("res/447.png"):
     # cv.waitKey()
     plt.imshow(edges, cmap="gray")
 
-    plt.show()
+    # plt.show()
     # # edges = cv.bitwise_not(edges)
 
-    cv.imwrite("fg/" + fn.split("/")[-1], edges)
+    cv.imwrite("bg/" + fn.split("/")[-1], edges)
