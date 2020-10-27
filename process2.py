@@ -14,11 +14,11 @@ def gamma(img, g=1.0):
     return cv2.LUT(img, table)
 
 
-epo = 10
+epo = 20
 # plt.ion()
 
-# for fn in range(1, n + 1):
-for fn in [112]:
+for fn in range(1, n + 1):
+# for fn in [112]:
     print("------------processing  %d------------" % fn)
     pre = float("inf")
 
@@ -28,7 +28,7 @@ for fn in [112]:
     raw = cv2.imread("res/%d.png" % fn, 0)
 
     raw = gamma(raw, 2)
-    raw = cv.normalize(raw, None, 0, 255, cv.NORM_MINMAX)
+    raw = cv2.normalize(raw, None, 0, 255, cv2.NORM_MINMAX)
 
     # raw = cv2.equalizeHist(raw)
     raw = cv2.merge([raw] * 3)
@@ -60,7 +60,7 @@ for fn in [112]:
         plt.subplot(224)
         plt.imshow(mk, cmap="gray")
         # plt.colorbar()
-        plt.show()
+        # plt.show()
         fg = mk.astype(np.uint8)
     cv2.imwrite("final/%d.png" % fn, fg)
 
