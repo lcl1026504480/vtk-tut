@@ -1,24 +1,25 @@
 import cv2
+import cv2 as cv
 import glob
 import numpy as np
 import matplotlib.pyplot as plt
 n = len(glob.glob("res/*"))
 
 
-def gamma(img, g=1.0):
+def gamma(raw, g=1.0):
     ig = g
     table = []
     for i in range(256):
         table.append(((i / 255)**ig) * 255)
     table = np.array([table]).astype("uint8")
-    return cv2.LUT(img, table)
+    return cv2.LUT(raw, table)
 
 
-epo = 20
+epo = 10
 # plt.ion()
 
 for fn in range(1, n + 1):
-# for fn in [112]:
+# for fn in [106, 113]:
     print("------------processing  %d------------" % fn)
     pre = float("inf")
 
@@ -27,10 +28,15 @@ for fn in range(1, n + 1):
     # mk[mk > 0] = 1
     raw = cv2.imread("res/%d.png" % fn, 0)
 
-    raw = gamma(raw, 2)
-    raw = cv2.normalize(raw, None, 0, 255, cv2.NORM_MINMAX)
+    raw = cv.bilateralFilter(raw, 1, 11, 11)
+    raw = gamma(raw, 6)
+    # raw = cv.normalize(raw, None, 0, 255, cv.NORM_MINMAX)
+    raw = cv2.equalizeHist(raw)
 
-    # raw = cv2.equalizeHist(raw)
+    k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (11, 11))
+    raw = cv.morphologyEx(raw, cv.MORPH_CLOSE, k)
+
+    # raw = cv.GaussianBlur(raw, (5, 5), 1)
     raw = cv2.merge([raw] * 3)
     h, w = fg.shape
     for i in range(epo):
@@ -60,6 +66,9 @@ for fn in range(1, n + 1):
         plt.subplot(224)
         plt.imshow(mk, cmap="gray")
         # plt.colorbar()
+        plt.tight_layout()
+        plt.suptitle("%d-%d" % (fn, i))
+        # plt.get_current_fig_manager().window.showMaximized()
         # plt.show()
         fg = mk.astype(np.uint8)
     cv2.imwrite("final/%d.png" % fn, fg)

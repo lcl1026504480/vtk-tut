@@ -27,17 +27,19 @@ for fn in glob.glob("res/*"):
 
     # image = cv.cvtColor(image, cv.COLOR_BGR2HSV)
     # h, s, img = cv.split(image)
+    img = cv.normalize(img, None, 0, 255, cv.NORM_MINMAX)
+    # img = gamma(img, 1.2)
 
     img = cv.bilateralFilter(img, 21, 11, 11)
 
     # img = cv.equalizeHist(img)
-    img = gamma(img, 1.2)
-    img = cv.normalize(img, None, 0, 255, cv.NORM_MINMAX)
-    # img = gamma(img, 2)
+    # img = gamma(img, 1.2)
+    #
+    #
     # k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (9, 9))
     # img = cv.morphologyEx(img, cv.MORPH_CLOSE, k)
-    k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (3, 3))
-    img = cv.morphologyEx(img, cv.MORPH_CLOSE, k)
+    # k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (3, 3))
+    # img = cv.morphologyEx(img, cv.MORPH_CLOSE, k)
 
     # img = gamma(img, 6)
 
@@ -52,15 +54,15 @@ for fn in glob.glob("res/*"):
 
     # img = gamma(img, 2)
 
-    # k = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
-    # img = cv.morphologyEx(img, cv.MORPH_OPEN, k)
+    k = cv.getStructuringElement(cv.MORPH_RECT, (7, 7))
+    img = cv.morphologyEx(img, cv.MORPH_OPEN, k)
     # img = gamma(img, 2.8)
 
     # img = cv.equalizeHist(img)
     # plt.hist(img.ravel(), 256, [0, 256])
     # plt.show()
 
-    img = cv.GaussianBlur(img, (5, 5), 1)
+    # img = cv.GaussianBlur(img, (5, 5), 1)
 
     plt.imshow(img, cmap="gray")
     # plt.show()
@@ -74,9 +76,9 @@ for fn in glob.glob("res/*"):
 
     # print(ret)
 
-    dc, dr = 250, 250
-    std = dc * dr / 100
-    mean = ret
+    dc, dr = 15, 15
+    std = dc * dr * 1000
+    mean = ret * 0.8
     edges = img.copy()
     for row in range(0, h, dr):
         for col in range(0, w, dc):
@@ -84,20 +86,27 @@ for fn in glob.glob("res/*"):
             if roi.max() < mean:
                 edges[row: row + dr, col: col + dc] = 0
             else:
-                if roi.min() > mean:
+                if roi.min() > mean and roi.std() < std:
                     edges[row: row + dr, col: col + dc] = 255
                 else:
+                    edges[row: row + dr,
+                          col: col + dc] = gamma(edges[row: row + dr,
+                                                       col: col + dc], 1)
+                    edges[row: row + dr,
+                          col: col + dc] = cv.normalize(edges[row: row + dr,
+                                                              col: col + dc], None, 0, 255, cv.NORM_MINMAX)
+
                     _, edges[row: row + dr,
                              col: col + dc] = cv.threshold(roi, ret, 255,
                                                            cv.THRESH_BINARY | cv.THRESH_OTSU)
 
     # edges = cv.Canny(img, 50, 310)
 
-    edges = cv.medianBlur(edges, 7)
+    # edges = cv.medianBlur(edges, 7)
     # edges = cv.medianBlur(edges, 5)
     # edges = cv.medianBlur(edges, 3)
 
-    k = cv.getStructuringElement(cv.MORPH_CROSS, (11, 11))
+    k = cv.getStructuringElement(cv.MORPH_RECT, (10, 10))
     edges = cv.morphologyEx(edges, cv.MORPH_CLOSE, k, iterations=1)
     # edges = cv.medianBlur(edges, 7)
 
